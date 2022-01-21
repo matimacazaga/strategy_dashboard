@@ -8,7 +8,9 @@ from stats import stats
 
 DATA_PATH = "./assets_data_testing.pickle"
 
-FILE_PATH = "./strategy_data.pickle"
+FILE_PATH_REWARDS = "./strategy_rewards.pickle"
+
+FILE_PATH_ACTIONS = "./strategy_actions.pickle"
 
 PERFORMANCE_COLUMNS = [
     "Mean Return",
@@ -48,19 +50,18 @@ MAPPER_RISK_COLUMNS = {
 }
 
 
-def get_strategy_info(file, start_date):
+def get_strategy_info(rewards, actions, start_date):
 
     statistics = {}
 
     rolling_volatilities = {}
 
-    returns = file["agent"].rewards.loc[start_date:].sum(axis=1)
+    returns = rewards.loc[start_date:].sum(axis=1)
 
     returns.iloc[0] = 0.0
 
     weights = (
-        file["agent"]
-        .actions.loc[start_date:]
+        actions.loc[start_date:]
         .stack()
         .reset_index()
         .rename({"level_0": "date", "level_1": "symbol", 0: "weight"}, axis=1)
@@ -166,7 +167,9 @@ def get_strategy_info(file, start_date):
     )
 
 
-file = pickle.load(open(FILE_PATH, "rb"))
+rewards = pickle.load(open(FILE_PATH_REWARDS, "rb"))
+
+actions = pickle.load(open(FILE_PATH_ACTIONS, "rb"))
 
 st.write("# Strategy Report")
 
@@ -185,7 +188,7 @@ start_date = st.date_input(
     rolling_volatilities,
     weights,
     days_in_portfolio,
-) = get_strategy_info(file, start_date)
+) = get_strategy_info(rewards, actions, start_date)
 
 st.write("## Performance metrics")
 
