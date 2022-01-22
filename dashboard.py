@@ -60,20 +60,27 @@ def get_strategy_info(rewards, actions, start_date):
 
     returns.iloc[0] = 0.0
 
-    weights = (
+    days_in_portfolio = (
         actions.loc[start_date:]
         .stack()
         .reset_index()
         .rename({"level_0": "date", "level_1": "symbol", 0: "weight"}, axis=1)
     )
 
-    weights = weights.loc[weights.loc[:, "weight"] != 0.0]
+    days_in_portfolio = days_in_portfolio.loc[days_in_portfolio.loc[:, "weight"] != 0.0]
 
     days_in_portfolio = (
-        weights.groupby("symbol").size().to_frame().rename({0: "days"}, axis=1)
+        days_in_portfolio.groupby("symbol").size(
+        ).to_frame().rename({0: "days"}, axis=1)
     )
 
-    weights.drop_duplicates(subset=["symbol", "weight"], inplace=True)
+    weights = (
+        actions.loc[start_date:]
+        .drop_duplicates()
+        .stack()
+        .reset_index()
+        .rename({"level_0": "date", "level_1": "symbol", 0: "weight"}, axis=1)
+    )
 
     rolling_volatilities["ML Strategy"] = returns.rolling(
         7).std(ddof=1).dropna()
