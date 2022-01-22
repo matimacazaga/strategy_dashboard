@@ -254,7 +254,7 @@ highest_avg_weight = (
     .sort_values("weight", ascending=False)
 )
 
-st.write("### Top 10 coins with highets average weight")
+st.write("### Top 10 coins with highest average weight")
 
 c = (
     alt.Chart(highest_avg_weight.iloc[:10].reset_index())
@@ -269,6 +269,8 @@ c = (
 
 st.altair_chart(c, use_container_width=True)
 
+st.write("### Top 10 coins with more days in portfolio")
+
 top_10_days_in_portfolio = days_in_portfolio.sort_values(
     "days", ascending=False)
 
@@ -280,6 +282,23 @@ c = (
         y=alt.Y("days:Q", title="Days in Portfolio"),
         tooltip=[alt.Tooltip("days:Q")],
     )
+)
+
+st.altair_chart(c, use_container_width=True)
+
+st.write("### Portfolio Composition in the last 15 rebalancing days.")
+dates = weights.loc[:, "date"].unique()
+
+last_15_days = weights.loc[weights.loc[:, "date"].isin(dates[-15:])]
+
+c = alt.Chart(last_15_days).mark_bar().encode(
+    x=alt.X("date:T", title="Date", axis=alt.Axis(
+        values=last_15_days.loc[:, "date"].tolist())),
+    y=alt.Y("weight:Q", title="Portfolio composition",
+            axis=alt.Axis(format=".0%")),
+    color=alt.Color("symbol:N", legend=None),
+    tooltip=[alt.Tooltip("symbol:N", title="Symbol"),
+             alt.Tooltip("weight:Q", format=".2%")]
 )
 
 st.altair_chart(c, use_container_width=True)
